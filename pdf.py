@@ -43,9 +43,9 @@ def index_of_abstract(lst):
 
 
 def guess(x, most):
-    if x.font_size > most.font_size:
+    if x.font_size > most:
         return True
-    if x.font_size == most.font_size and x.font.lower().endswith("-medi"):
+    if x.font_size == most and x.font.lower().endswith("-medi"):
         # return True
         p = re.compile(r"[\div\.]+\s.*", re.IGNORECASE)
         if p.match(x.text) is not None:
@@ -72,15 +72,14 @@ def main(inp, out, force=False):
     metadata = reader.metadata
     writer.add_metadata(metadata)
 
-    cnt = Counter(data)
-    most = max(data, key=lambda x: cnt.get(x))
-    large = [x for x in cnt if guess(x, most)]
+    most = Counter([x.font_size for x in data]).most_common(1)[0][0]
+    sections = [x for x in data if guess(x, most)]
 
-    if (idx := index_of_abstract(large)) >= 0:
-        large = large[idx + 1 :]
+    if (idx := index_of_abstract(sections)) >= 0:
+        sections = sections[idx + 1 :]
 
     prev = None
-    for x in large:
+    for x in sections:
         fit = pypdf.generic.Fit.xyz(left=x.left, top=x.top)
         if prev is not None and prev[0].font_size > x.font_size:
             writer.add_outline_item(
