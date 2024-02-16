@@ -42,7 +42,7 @@ def index_of_abstract(lst):
     return -1
 
 
-def guess(x, most):
+def guess(x: Data, most: float):
     if x.font_size > most:
         return True
     if x.font_size == most and x.font.lower().endswith("-medi"):
@@ -50,6 +50,13 @@ def guess(x, most):
         p = re.compile(r"[\div\.]+\s.*", re.IGNORECASE)
         if p.match(x.text) is not None:
             return True
+    return False
+
+
+def validate(x):
+    if len(x.text.strip()) > 0 and \
+        x.top >= 0 and x.left >= 0:
+        return True
     return False
 
 
@@ -67,7 +74,7 @@ def main(inp, out, force=False):
         page_num += 1
 
     global data
-    data = [x for x in data if len(x.text.strip()) > 0]
+    data = [x for x in data if validate(x)]
 
     metadata = reader.metadata
     writer.add_metadata(metadata)
@@ -78,16 +85,24 @@ def main(inp, out, force=False):
     if (idx := index_of_abstract(sections)) >= 0:
         sections = sections[idx + 1 :]
 
-    prev = None
+    stack = []
     for x in sections:
         fit = pypdf.generic.Fit.xyz(left=x.left, top=x.top)
-        if prev is not None and prev[0].font_size > x.font_size:
-            writer.add_outline_item(
-                title=x.text, page_number=x.page_num, fit=fit, parent=prev[1]
-            )
+
+        # Pop elements from the stack that are of a lower or equal level
+        while stack and stack[-1][0].font_size <= x.font_size:
+            stack.pop()
+        
+        if stack:
+            # If there's an element in the stack, it is the parent
+            parent = stack[-1][1]
+            obj = writer.add_outline_item(title=x.text, page_number=x.page_num, fit=fit, parent=parent)
         else:
+            # If stack is empty, there's no parent
             obj = writer.add_outline_item(title=x.text, page_number=x.page_num, fit=fit)
-            prev = (x, obj)
+        
+        # Push the current element onto the stack
+        stack.append((x, obj))
 
     with open(out, "wb") as fp:
         writer.write(fp)
