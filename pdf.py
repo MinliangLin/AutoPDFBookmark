@@ -53,7 +53,7 @@ def guess(x, most):
     return False
 
 
-def main(inp="/tmp/tmp.pdf", out="/tmp/tmp2.pdf", force=False):
+def main(inp, out, force=False):
     reader = pypdf.PdfReader(inp)
     writer = pypdf.PdfWriter(out)
 
