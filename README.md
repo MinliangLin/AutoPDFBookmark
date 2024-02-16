@@ -4,6 +4,8 @@ Generate bookmarks, also known as an outline or a table of contents, for recent 
 
 ## Install
 
+Require `python >= 3.8` because we uses warlus assignment in the code.
+
 ```sh
 pip install fire pypdf
 ```
