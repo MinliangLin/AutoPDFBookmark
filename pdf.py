@@ -54,6 +54,9 @@ def guess(x: Data, most: float):
 
 
 def validate(x):
+    # NOTE: remove arxiv side notation
+    if x.text.lower().startswith("arxiv:"):
+        return False
     if len(x.text.strip()) > 0 and \
         x.top >= 0 and x.left >= 0:
         return True
