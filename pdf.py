@@ -37,7 +37,7 @@ def visitor(text, cm, tm, font_dict, font_size):
 
 def index_of_abstract(lst):
     for i, x in enumerate(lst):
-        if x.text.lower() == "abstract":
+        if x.text.lower().strip() == "abstract":
             return i
     return -1
 
@@ -45,10 +45,14 @@ def index_of_abstract(lst):
 def guess(x: Data, most: float):
     if x.font_size > most:
         return True
+    # TODO: it seems that '/Subtype': '/Type0' in font should be used?
     if x.font_size == most and x.font.lower().endswith("-medi"):
         # return True
         p = re.compile(r"[\div\.]+\s.*", re.IGNORECASE)
         if p.match(x.text) is not None:
+            return True
+        # NOTE: the abstract hack here is ugly hack here.
+        if  x.text.lower().strip() == "abstract":
             return True
     return False
 
