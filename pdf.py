@@ -37,7 +37,7 @@ def visitor(text, cm, tm, font_dict, font_size):
 
 def index_of_abstract(lst):
     for i, x in enumerate(lst):
-        if x.text.lower().strip() == "abstract":
+        if "abstract" in x.text.lower().strip():
             return i
     return -1
 
@@ -48,11 +48,11 @@ def guess(x: Data, most: float):
     # TODO: it seems that '/Subtype': '/Type0' in font should be used?
     if x.font_size == most and x.font.lower().endswith("-medi"):
         # return True
-        p = re.compile(r"[\div\.]+\s.*", re.IGNORECASE)
+        p = re.compile(r"[\div]+\.*\s.*", re.IGNORECASE)
         if p.match(x.text) is not None:
             return True
         # NOTE: the abstract hack here is ugly hack here.
-        if  x.text.lower().strip() == "abstract":
+        if x.text.lower().strip() == "abstract":
             return True
     return False
 
@@ -61,8 +61,7 @@ def validate(x):
     # NOTE: remove arxiv side notation
     if x.text.lower().startswith("arxiv:"):
         return False
-    if len(x.text.strip()) > 0 and \
-        x.top >= 0 and x.left >= 0:
+    if len(x.text.strip()) > 0 and x.top >= 0 and x.left >= 0:
         return True
     return False
 
@@ -99,15 +98,17 @@ def main(inp, out, force=False):
         # Pop elements from the stack that are of a lower or equal level
         while stack and stack[-1][0].font_size <= x.font_size:
             stack.pop()
-        
+
         if stack:
             # If there's an element in the stack, it is the parent
             parent = stack[-1][1]
-            obj = writer.add_outline_item(title=x.text, page_number=x.page_num, fit=fit, parent=parent)
+            obj = writer.add_outline_item(
+                title=x.text, page_number=x.page_num, fit=fit, parent=parent
+            )
         else:
             # If stack is empty, there's no parent
             obj = writer.add_outline_item(title=x.text, page_number=x.page_num, fit=fit)
-        
+
         # Push the current element onto the stack
         stack.append((x, obj))
 
